@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Misa Amane - Espace Minimaliste</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #000000;
+        }
+
+        /* Arrière-plan étiré de force (PC & Mobile) */
+        #fondContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url('arriere-plan.jpeg');
+            background-size: 100% 100%;
+            background-position: center center;
+            background-repeat: no-repeat;
+            z-index: -1;
+            transition: background-image 0.5s ease-in-out;
+            filter: brightness(105%) saturate(115%);
+        }
+
+        /* --- SYSTÈME D'EMOJIS QUI TOMBENT --- */
+        .flower-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 50;
+        }
+
+        .falling-flower {
+            position: absolute;
+            top: -10vh;
+            font-size: 24px;
+            opacity: 0.78;
+            user-select: none;
+            animation: fallAndRotate linear infinite;
+        }
+
+        @keyframes fallAndRotate {
+            0% {
+                transform: translateY(-50px) rotate(0deg);
+                opacity: 0;
+            }
+            15% {
+                opacity: 0.78;
+            }
+            85% {
+                opacity: 0.78;
+            }
+            100% {
+                transform: translateY(105vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* --- BOUTON DE NAVIGATION EN HAUT À DROITE --- */
+        #btnNavigation {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            color: #000000;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            z-index: 150;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+            touch-action: manipulation;
+            backdrop-filter: blur(5px);
+        }
+
+        #btnNavigation:hover {
+            transform: scale(1.05);
+            background-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        /* --- GROUPE DE BOUTONS EN BAS À GAUCHE --- */
+        #groupeBoutonsFond {
+            position: fixed;
+            bottom: 12px;
+            left: 12px;
+            z-index: 150;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-fond-action {
+            background: rgba(255, 255, 255, 0.3);
+            color: #000000;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.78rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+            touch-action: manipulation;
+        }
+
+        .btn-fond-action:hover {
+            transform: scale(1.05);
+            background-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Voile de transition doux pour changer de page */
+        #ecranVoile {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #ffffff;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+            z-index: 99;
+        }
+
+        #ecranVoile.fondu {
+            opacity: 0.85;
+        }
+
+        /* --- LE LECTEUR CENTRAL RESPONSIVE (Page 2) --- */
+        #centreYoutube {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 140;
+            display: none;
+            width: 88vw;
+            max-width: 500px;
+            aspect-ratio: 16 / 9;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 10px;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+        }
+
+        .boite-mystere-centrale {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.4);
+            border: 2px dashed rgba(255, 255, 255, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            gap: 8px;
+            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+            box-shadow: inset 0 2px 8px rgba(255, 255, 255, 0.5);
+        }
+
+        .boite-mystere-centrale:hover {
+            transform: scale(1.01);
+            background: rgba(255, 255, 255, 0.65);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .boite-mystere-centrale .icone-mq {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .boite-mystere-centrale .texte-mq {
+            font-size: clamp(0.8rem, 2.2vw, 1.1rem);
+            font-weight: bold;
+            color: #000000;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        #centreYoutube iframe {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            border: none;
+            display: block;
+        }
+
+        /* --- LA MACHINE À TICKETS V2 (Page 3 - 100% Noir & Blanc) --- */
+        #centreMachine {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 140;
+            display: none;
+            width: 90vw;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 14px;
+            border-radius: 26px;
+            border: 2px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .machine-corps {
+            background: #ffffff;
+            border: 2.5px solid #000000;
+            border-radius: 20px;
+            padding: 18px 16px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 0 #000000, inset 0 0 0 2px #ffffff;
+            position: relative;
+            transition: transform 0.15s ease;
+        }
+
+        /* Petites vis décoratives aux 4 coins de la machine */
+        .vis-coin {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border: 1.5px solid #000000;
+            border-radius: 50%;
+            background: #ffffff;
+        }
+        .vis-coin::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 1px;
+            right: 1px;
+            height: 1.2px;
+            background: #000000;
+            transform: translateY(-50%) rotate(45deg);
+        }
+        .vis-tl { top: 8px; left: 8px; }
+        .vis-tr { top: 8px; right: 8px; }
+        .vis-bl { bottom: 8px; left: 8px; }
+        .vis-br { bottom: 8px; right: 8px; }
+
+        .machine-corps.vibration {
+            animation: machineSecousse 0.45s ease-in-out infinite;
+        }
+
+        @keyframes machineSecousse {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-2px, 1px) rotate(-0.6deg); }
+            40% { transform: translate(2px, -1px) rotate(0.6deg); }
+            60% { transform: translate(-2px, -1px) rotate(-0.4deg); }
+            80% { transform: translate(2px, 1px) rotate(0.4deg); }
+        }
+
+        .machine-entete {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #000000;
+            padding: 2px 6px 10px 6px;
+        }
+
+        .machine-statut {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #000000;
+        }
+
+        .voyant-noir {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #000000;
+            border: 1.5px solid #000000;
+            display: inline-block;
+        }
+
+        .voyant-noir.clignote {
+            animation: clignotementVoyant 0.16s infinite alternate;
+        }
+
+        @keyframes clignotementVoyant {
+            from { background-color: #000000; transform: scale(1.15); }
+            to { background-color: #ffffff; transform: scale(0.85); }
+        }
+
+        .compteur-tickets-badge {
+            background: #000000;
+            color: #ffffff;
+            font-size: 0.72rem;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            letter-spacing: 0.5px;
+        }
+
+        /* Écran digital monochrome Noir & Blanc */
+        .machine-ecran-cadre {
+            width: 100%;
+            background: #000000;
+            color: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 12px;
+            padding: 12px 10px 10px 10px;
+            text-align: center;
+            font-family: monospace;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 3px 8px rgba(255, 255, 255, 0.12);
+        }
+
+        .machine-ecran-info {
+            font-size: 0.8rem;
+            font-weight: bold;
+            letter-spacing: 0.4px;
+            min-height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.35;
+        }
+
+        .barre-progression-fond {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid #ffffff;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .barre-progression-remplissage {
+            width: 0%;
+            height: 100%;
+            background: #ffffff;
+            transition: width 0.1s linear;
+        }
+
+        /* Fente d'impression thermique */
+        .fente-zone {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            margin: 2px 0;
+        }
+
+        .fente-rebord {
+            width: 88%;
+            height: 14px;
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+        }
+
+        .fente-noire {
+            width: 92%;
+            height: 6px;
+            background: #000000;
+            border-radius: 4px;
+        }
+
+        .mini-ticket-sortie-masque {
+            width: 76%;
+            height: 68px;
+            overflow: hidden;
+            position: relative;
+            margin-top: -5px;
+            display: flex;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .mini-ticket-papier {
+            width: 94%;
+            height: 62px;
+            background: #ffffff;
+            border-left: 2px solid #000000;
+            border-right: 2px solid #000000;
+            border-bottom: 2px dashed #000000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 6px 10px;
+            transform: translateY(-66px);
+            transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18);
+        }
+
+        .mini-ticket-papier.ejete {
+            transform: translateY(0px);
+        }
+
+        .mini-ticket-entete {
+            font-family: monospace;
+            font-size: 0.62rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #000000;
+            width: 100%;
+            text-align: center;
+            padding-bottom: 2px;
+        }
+
+        .ligne-faux-texte {
+            width: 80%;
+            height: 2.5px;
+            background: #000000;
+        }
+
+        .ligne-faux-texte.courte {
+            width: 50%;
+        }
+
+        .mini-code-barres {
+            width: 75%;
+            height: 7px;
+            background: repeating-linear-gradient(
+                90deg,
+                #000000 0px,
+                #000000 2px,
+                #ffffff 2px,
+                #ffffff 4px,
+                #000000 4px,
+                #000000 5px,
+                #ffffff 5px,
+                #ffffff 8px
+            );
+            margin-top: 2px;
+        }
+
+        /* Bouton mécanique d'impression */
+        .btn-tirer-ticket {
+            width: 100%;
+            background: #000000;
+            color: #ffffff;
+            border: 2px solid #000000;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-weight: 900;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 0 #000000;
+            transition: transform 0.12s, background 0.15s, color 0.15s, box-shadow 0.12s;
+            touch-action: manipulation;
+        }
+
+        .btn-tirer-ticket:hover:not(:disabled) {
+            background: #ffffff;
+            color: #000000;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 0 #000000;
+        }
+
+        .btn-tirer-ticket:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #000000;
+        }
+
+        .btn-tirer-ticket:disabled {
+            opacity: 0.65;
+            cursor: wait;
+        }
+
+        /* --- OVERLAY DU TICKET ZOOMÉ (100% Noir & Blanc + Croix Rouge) --- */
+        #ticketZoomOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(5px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #ticketZoomOverlay.actif {
+            display: flex;
+            opacity: 1;
+        }
+
+        .ticket-carte-zoom {
+            position: relative;
+            width: 92%;
+            max-width: 385px;
+            background: #ffffff;
+            color: #000000;
+            border: 3px solid #000000;
+            border-radius: 16px;
+            padding: 24px 20px 20px 20px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
+            text-align: center;
+            transform: scale(0.3) translateY(50px);
+            opacity: 0;
+            transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.35s ease;
+        }
+
+        #ticketZoomOverlay.actif .ticket-carte-zoom {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        /* Encoches latérales de billet */
+        .ticket-carte-zoom::before,
+        .ticket-carte-zoom::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 20px;
+            height: 20px;
+            background: #000000;
+            border: 2px solid #000000;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+
+        .ticket-carte-zoom::before {
+            left: -12px;
+        }
+
+        .ticket-carte-zoom::after {
+            right: -12px;
+        }
+
+        .ticket-bordure-interne {
+            border: 2px dashed #000000;
+            border-radius: 12px;
+            padding: 16px 14px 14px 14px;
+            background: #ffffff;
+        }
+
+        .ticket-meta-haut {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: monospace;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 8px;
+            margin-bottom: 14px;
+        }
+
+        .ticket-phrase-contenu {
+            font-size: clamp(0.95rem, 3vw, 1.1rem);
+            line-height: 1.55;
+            font-weight: 700;
+            color: #000000;
+            margin: 12px 0 16px 0;
+            min-height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        .ticket-code-barres-grand {
+            width: 85%;
+            height: 22px;
+            margin: 10px auto 6px auto;
+            background: repeating-linear-gradient(
+                90deg,
+                #000000 0px,
+                #000000 3px,
+                #ffffff 3px,
+                #ffffff 6px,
+                #000000 6px,
+                #000000 7px,
+                #ffffff 7px,
+                #ffffff 11px,
+                #000000 11px,
+                #000000 15px,
+                #ffffff 15px,
+                #ffffff 17px
+            );
+        }
+
+        .ticket-pied {
+            font-family: monospace;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: #000000;
+            border-top: 1.5px dashed #000000;
+            padding-top: 8px;
+        }
+
+        /* SEULE AUTORISATION DE COULEUR ROUGE : LA CROIX X POUR FERMER LE TICKET */
+        #btnFermerTicket {
+            position: absolute;
+            top: -14px;
+            right: -14px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #e53935;
+            color: #ffffff;
+            border: 2.5px solid #ffffff;
+            font-weight: 900;
+            font-size: 1.05rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(229, 57, 53, 0.75);
+            transition: transform 0.2s, background-color 0.2s;
+            z-index: 210;
+            touch-action: manipulation;
+        }
+
+        #btnFermerTicket:hover {
+            background-color: #c62828;
+            transform: scale(1.12) rotate(90deg);
+        }
+
+        /* Popups communes (Page 1) */
+        .popup-centre {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            background: rgba(255, 255, 255, 0.94);
+            padding: 4vh 4vw;
+            border-radius: 20px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            z-index: 150;
+            backdrop-filter: blur(8px);
+            width: 90%;
+            max-width: 380px;
+            opacity: 1;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: translate(-50%, -40%) scale(0.85); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .popup-centre.disparition {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.8) !important;
+            pointer-events: none;
+        }
+
+        .popup-centre h1 {
+            font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+            color: #000000;
+            margin-top: 0;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .popup-centre p {
+            font-size: clamp(0.85rem, 2.8vw, 1rem);
+            color: #000000;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .btn-popup {
+            background-color: rgba(255, 255, 255, 0.3);
+            color: #000000;
+            border: 2px solid rgba(0, 0, 0, 0.25);
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+            touch-action: manipulation;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-popup:disabled {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            color: rgba(0, 0, 0, 0.4) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        .btn-popup:not(:disabled):hover {
+            background-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        #messageAmoureux {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        const prenomUtilisateur = "Mon Trésor";
+    </script>
+
+    <!-- Éléments visuels -->
+    <div id="fondContainer"></div>
+    <div id="ecranVoile"></div>
+
+    <!-- Conteneur des emojis qui tombent -->
+    <div class="flower-container"></div>
+
+    <!-- Boutons en bas à gauche -->
+    <div id="groupeBoutonsFond">
+        <button class="btn-fond-action" onclick="changerProchainFond()">
+            🖼️ Changer
+        </button>
+        <button class="btn-fond-action" onclick="remettreFondDefaut()">
+            ↩️ Défaut
+        </button>
+    </div>
+
+    <!-- Bouton en haut à droite pour changer de page -->
+    <button id="btnNavigation" onclick="basculerPage()">
+        <span id="iconeBouton">🎵</span> <span id="texteBouton">Musique</span>
+    </button>
+
+    <!-- Lecteur YouTube Unique et Centralisé (Visible uniquement sur la page 2) -->
+    <div id="centreYoutube">
+        <div class="boite-mystere-centrale" id="boiteCentrale" onclick="chargerLecteurCentral()">
+            <span class="icone-mq">❓</span>
+            <span class="texte-mq">Clique pour révéler la surprise musicale ✨</span>
+        </div>
+    </div>
+
+    <!-- Machine à Tickets Améliorée (Visible uniquement sur la page 3) -->
+    <div id="centreMachine">
+        <div class="machine-corps" id="machineCorps">
+            <span class="vis-coin vis-tl"></span>
+            <span class="vis-coin vis-tr"></span>
+            <span class="vis-coin vis-bl"></span>
+            <span class="vis-coin vis-br"></span>
+
+            <div class="machine-entete">
+                <div class="machine-statut">
+                    <span class="voyant-noir" id="voyantMachine"></span>
+                    <span>DISTRIBUTEUR MISA-100</span>
+                </div>
+                <span class="compteur-tickets-badge" id="badgeCompteurTickets">100 / 100</span>
+            </div>
+
+            <div class="machine-ecran-cadre">
+                <div class="machine-ecran-info" id="ecranInfoMachine">
+                    PRÊT • APPUIE POUR TIRER UN BILLET UNIQUE 🖤
+                </div>
+                <div class="barre-progression-fond">
+                    <div class="barre-progression-remplissage" id="barreProgressionTicket"></div>
+                </div>
+            </div>
+
+            <div class="fente-zone">
+                <div class="fente-rebord">
+                    <div class="fente-noire"></div>
+                </div>
+                <div class="mini-ticket-sortie-masque">
+                    <div class="mini-ticket-papier" id="miniTicketPapier">
+                        <div class="mini-ticket-entete" id="miniTicketCode">MISA #001</div>
+                        <div class="ligne-faux-texte"></div>
+                        <div class="ligne-faux-texte courte"></div>
+                        <div class="mini-code-barres"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-tirer-ticket" id="btnTirerTicket" onclick="actionnerMachineTicket()">
+                <span>🎟️</span> <span>Imprimer un ticket</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Ticket Zoomé (S'affiche quand la machine crache un ticket) -->
+    <div id="ticketZoomOverlay">
+        <div class="ticket-carte-zoom">
+            <button id="btnFermerTicket" onclick="fermerTicketZoom()" title="Fermer le ticket">✕</button>
+            <div class="ticket-bordure-interne">
+                <div class="ticket-meta-haut">
+                    <span id="ticketNumeroTitre">TICKET N°001/100</span>
+                    <span id="ticketHeureTirage">00:00</span>
+                </div>
+                <div class="ticket-phrase-contenu" id="ticketPhraseTexte">...</div>
+                <div class="ticket-code-barres-grand"></div>
+                <div class="ticket-pied">ÉDITION UNIQUE • SANS DOUBLON 🖤</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Première Popup de Bienvenue (Page 1) -->
+    <div id="messageBienvenue" class="popup-centre">
+        <h1>Bienvenue 💕</h1>
+        <p id="texteBienvenueDynamique">Je t'apprécie. Je t'apprécie vraiment, j'ai fait cet endroit spécialement pour toi.</p>
+        <button id="btnFermerAccueil" class="btn-popup" disabled onclick="fermerBienvenueEtOuvrirAmour()">Lecture... (5s)</button>
+    </div>
+
+    <!-- Deuxième Popup Amoureuse -->
+    <div id="messageAmoureux" class="popup-centre">
+        <h1>P'tit mot doux... 💌</h1>
+        <p>Je suis tellement amoureux que je sais pas quoi faire, c'est pour ça que je me suis dit que ça serait bien de faire un site web pour toi... la vérité, je sais même pas comment te parler tellement je suis amoureux. 🌸</p>
+        <button id="btnFermerAmour" class="btn-popup" disabled onclick="fermerAmour()">J'ai compris ✨</button>
+    </div>
+
+<script>
+    let pageActuelle = 1;
+
+    // Fonds par défaut des 3 pages
+    const fondDefautPage1 = 'arriere-plan.jpeg';
+    const fondDefautPage2 = 'arriere-plan2.jpeg';
+    const fondDefautPage3 = 'arriere-plan3.jpeg';
+
+    // Association sur-mesure des emojis pour tes 12 images de Misa Amane
+    const emojisParImage = {
+        'arriere-plan.jpeg':  ['💀', '⚔️', '🍎', '🖤'],
+        'arriere-plan2.jpeg': ['💀', '🕯️', '🪽', '🖤'],
+        'arriere-plan3.jpeg': ['📓', '🍎', '⛓️', '🖤'],
+        'fond.jpeg':          ['📓', '🍎', '⛓️', '🖤'],
+        'fond2.jpeg':         ['🥀', '🤍', '💀', '🖤'],
+        'fond3.jpeg':         ['📓', '🖋️', '🖤', '✨'],
+        'fond4.jpeg':         ['🤍', '🎀', '🖤', '✨'],
+        'fond5.jpeg':         ['🕯️', '💀', '🕰️', '🖤'],
+        'fond6.jpeg':         ['📓', '💀', '⛓️', '🖤'],
+        'fond7.jpeg':         ['✌️', '🎀', '🖤', '🤍'],
+        'fond8.jpeg':         ['💀', '⚔️', '🍎', '🖤'],
+        'fond9.jpeg':         ['💀', '🕯️', '🪽', '🖤']
+    };
+
+    // Liste des emojis actifs en ce moment
+    let emojisActuels = emojisParImage[fondDefautPage1];
+
+    // Mémorisation indépendante du fond actif pour chaque page
+    let fondMemoirePage1 = null;
+    let fondMemoirePage2 = null;
+    let fondMemoirePage3 = null;
+
+    // Index de défilement séparé pour chaque page
+    let indexFondPage1 = 0;
+    let indexFondPage2 = 0;
+    let indexFondPage3 = 0;
+
+    let listeFondsDisponibles = [];
+
+    // --- LES 100 PHRASES UNIQUES DE LA MACHINE ---
+    const phrasesMachine = [
+        "Je me demande pour qui a été créé ce monde. Pourquoi je me pose cette question ? Bien sûr à toi. ✨",
+        "Si le temps s'arrêtait maintenant, je choisirais de rester figé exactement à l'instant où je pense à toi. ⏳🖤",
+        "Il y a des milliards de personnes sur cette planète, et pourtant mon cerveau s'est bloqué sur une seule. 🌍💫",
+        "Parfois je me dis que le hasard n'existe pas, c'est juste le destin qui a bien codé notre rencontre. 💻✨",
+        "À quoi sert d'avoir toutes les réponses de l'univers si la seule question qui compte, c'est ton sourire ? 🌌🤍",
+        "Même dans le silence le plus total, ton prénom fait plus de bruit que n'importe quelle musique. 🎵🖤",
+        "On dit que rien n'est parfait dans ce monde, mais ceux qui disent ça ne t'ont clairement jamais croisée. 🌸✨",
+        "Si chaque étoile dans le ciel était une pensée pour toi, la nuit ressemblerait au plein jour. 🌟🤍",
+        "La logique voudrait que je garde les pieds sur terre, mais dès que tu es là, la gravité lâche prise. 🚀💫",
+        "Je ne sais pas ce que demain nous réserve, mais tant que tu en fais partie, ça me va déjà. 🗓️🖤",
+        "Certaines personnes traversent la vie comme des passants, toi tu es arrivée comme une évidence. 🚪✨",
+        "Si je devais écrire un livre sur ce qui rend la vie belle, chaque page porterait simplement ton nom. 📖🤍",
+        "Le monde tourne à toute vitesse, mais quand je te regarde, tout ralentit d'un coup. 🕰️💫",
+        "J'ai essayé de trouver un défaut à ta présence, mais même mon esprit critique a abandonné. 🧠🖤",
+        "La vraie magie, ce n'est pas les tours de cartes, c'est la façon dont tu changes mon humeur en une seconde. 🃏✨",
+        "Est-ce que c'est normal de sourire tout seul devant son écran juste en repensant à toi ? 📱🤍",
+        "Dans un univers infini et froid, tu es exactement le genre d'étincelle qui réchauffe tout. 🔥🌌",
+        "Les mots sont souvent trop petits pour expliquer ce que je ressens, alors j'ai construit cet endroit pour toi. 🏗️💕",
+        "Si la beauté était une mélodie, tu serais le refrain que je peux écouter en boucle sans jamais me lasser. 🎶✨",
+        "Peu importe la complexité du système autour de nous, avec toi tout redevient simple. 🤍🖤",
+        "Tu es la seule exception que j'accepte volontiers dans toutes mes règles. 📜💫",
+        "Même les jours où je n'ai envie de parler à personne, toi tu restes ma priorité absolue. 🔕🖤",
+        "Il suffit d'un seul regard de ta part pour effacer une journée entière de fatigue. 👁️✨",
+        "Si j'avais un carnet magique, je n'y écrirais que des raisons de te rendre heureuse. 📓🤍",
+        "La nuit porte conseil, paraît-il, mais la mienne ne fait que me répéter à quel point je tiens à toi. 🌙💫",
+        "Tu as ce truc rare qui fait que même le noir et blanc prend toutes les couleurs du monde autour de toi. 🎞️✨",
+        "Je ne cherche pas la perfection, je cherche juste à continuer de découvrir chaque facette de toi. 🔍🖤",
+        "Quand tu ris, on dirait que tous les problèmes du monde prennent cinq minutes de pause. 😂🤍",
+        "C'est fou comment une seule personne peut devenir l'endroit où l'on se sent le mieux. 🏠💕",
+        "Si le bonheur avait une adresse, je suis sûr qu'il habiterait quelque part dans ton regard. 📍✨",
+        "Même si je fais semblant d'être détaché de tout, face à toi je perds toute ma carapace. 🛡️🖤",
+        "Chaque seconde passée à créer ce site était une façon silencieuse de te dire que tu comptes. ⌨️🤍",
+        "Tu es un peu comme ma chanson préférée : dès les premières notes, je sais que ça va me faire du bien. 🎧💫",
+        "Pourquoi chercher des trésors au bout du monde quand le plus précieux est juste là ? 💎✨",
+        "J'aimerais parfois pouvoir lire dans tes pensées, juste pour savoir si j'y passe aussi souvent que toi dans les miennes. 💭🖤",
+        "Le vrai luxe, ce n'est pas l'or ou l'argent, c'est le temps que j'ai la chance de partager avec toi. ⌚🤍",
+        "Tu transformes les moments les plus banals en souvenirs que je n'ai aucune envie d'oublier. 📸✨",
+        "Si je devais recommencer cette vie à zéro, je reprendrais exactement le même chemin pour te retrouver. 🔄💫",
+        "Il y a des mystères que la science n'expliquera jamais, comme l'effet que tu me fais à chaque fois. 🧪🖤",
+        "Tu es la preuve vivante que les plus belles choses arrivent souvent sans prévenir. 🎁🤍",
+        "Dans le chaos permanent de mes idées, tu es le seul point calme et lumineux. 🕯️✨",
+        "Je ne suis pas doué pour les grands discours, alors je laisse ces petits tickets parler à ma place. 🎟️🖤",
+        "À chaque fois que tu souris, quelque part dans l'univers, une étoile gagne en intensité. ⭐💫",
+        "Si la vie est un jeu, alors te rencontrer a clairement été mon meilleur coup. ♟️🤍",
+        "Tu as cette élégance naturelle qui n'a besoin d'aucun artifice pour briller. ✨🖤",
+        "Même sous la pluie la plus grise, penser à toi suffit à ramener le soleil. ☔🌤️",
+        "Je me demande souvent comment j'ai fait pour vivre avant de te connaître. 🤔🤍",
+        "Tu es le genre de personne pour qui on a envie de devenir meilleur chaque jour. 🌱💫",
+        "Les heures passent comme des minutes quand c'est toi qui occupes mes pensées. ⏱️🖤",
+        "Il n'y a pas de mode d'emploi pour ce que je ressens, c'est juste brut, sincère et vrai. 🤍✨",
+        "Si je pouvais capturer un instant en bouteille, ce serait le premier moment où je t'ai vue sourire. 🧪💕",
+        "Tu as le pouvoir de rendre l'ordinaire totalement extraordinaire. 🪄💫",
+        "Dans un monde rempli de copies, tu es résolument une édition limitée. 🏷️🖤",
+        "Même à distance, ta présence se fait sentir comme une évidence calme. 📡🤍",
+        "Je crois que mon cœur a choisi son camp bien avant que mon cerveau ne s'en rende compte. ❤️‍🔥✨",
+        "La philosophie pose des questions compliquées, mais la réponse la plus douce reste toujours toi. 📚💫",
+        "Tu es la seule personne capable de me faire perdre mes mots alors que j'en ai toujours trop. 🤐🖤",
+        "Chaque détail chez toi est une petite œuvre d'art que je ne me lasse pas d'admirer. 🎨🤍",
+        "Si la lune pouvait parler, elle te raconterait combien de fois je l'ai regardée en pensant à toi. 🌕✨",
+        "Le futur ne me fait pas peur tant que j'ai l'espoir de te voir encore sourire. 🔮💫",
+        "Tu es le calme avant, pendant et après la tempête. 🌊🖤",
+        "Je n'ai pas besoin de mille raisons pour t'apprécier, ta simple existence suffit largement. 🤍✨",
+        "Parfois, le plus beau cadeau de la journée, c'est juste de croiser ton regard. 👀💕",
+        "Si les pensées avaient des ailes, ma chambre serait envahie de papillons qui volent vers toi. 🦋💫",
+        "Tu es la note parfaite dans une partition que je croyais impossible à jouer. 🎼🖤",
+        "Je garde chaque petit moment avec toi comme un secret précieux que personne ne peut voler. 🔐🤍",
+        "Même quand tout semble absurde autour de nous, toi tu as un sens logique implacable. 🧩✨",
+        "Tu illumines l'écran bien plus que n'importe quelle ligne de code que je pourrais écrire. 💡💻",
+        "La vérité, c'est que je pourrais tirer mille tickets et chacun dirait la même chose : je tiens à toi. 🎟️🖤",
+        "Tu as cette douceur qui désarme n'importe quelle mauvaise humeur en un clin d'œil. ☁️🤍",
+        "Si le destin est un artiste, alors tu es sans aucun doute son chef-d'œuvre. 🖼️✨",
+        "Je ne sais pas si les anges existent, mais tu t'en rapproches dangereusement. 🪽💫",
+        "Chaque fois que tu cliques ici, c'est un petit morceau de ce que je n'ose pas dire à voix haute. 🤫🖤",
+        "Le silence entre nous vaut mieux que mille conversations inutiles avec le reste du monde. 🔇🤍",
+        "Tu es l'équilibre parfait entre le mystère et la lumière. 🌓✨",
+        "Si j'étais poète, j'écrirais des vers ; comme je code, j'ai fabriqué cette machine pour toi. ⚙️💕",
+        "Il y a des rencontres qui changent une journée, et il y a toi qui changes toute la perspective. 🔭💫",
+        "Tu es la preuve que la grâce et la gentillesse peuvent tenir dans une seule personne. 🕊️🖤",
+        "Même au milieu d'une foule immense, c'est toujours toi que mes yeux cherchent en premier. 🏙️🤍",
+        "Le temps passe, les saisons changent, mais l'admiration que j'ai pour toi reste intacte. 🍂❄️",
+        "Tu es le genre de rêve éveillé dont on n'a jamais envie de sortir. 🛌✨",
+        "S'il fallait résumer ma définition du bonheur en un mot, je n'aurais même pas à réfléchir. 💭💫",
+        "Tu apportes une paix incroyable juste en étant toi-même, sans rien forcer. 🍃🖤",
+        "Les étoiles doivent être jalouses de la façon dont tes yeux brillent. ✨👁️",
+        "Je ne crois pas aux coïncidences, je crois juste que nos chemins devaient se croiser. 🛤️🤍",
+        "Tu es la meilleure partie de mes journées, même quand on ne se parle que quelques minutes. ⏳💕",
+        "Si je pouvais t'offrir le monde, je le ferais, mais en attendant je t'offre ce petit coin d'internet. 🌐✨",
+        "Ton authenticité est ce qui te rend infiniment plus belle que tout le reste. 💎🖤",
+        "À chaque battement de cœur, il y a un peu de toi qui résonne quelque part. 💓💫",
+        "Tu es l'énigme la plus fascinante que j'aie jamais eu envie de résoudre. 🗝️🤍",
+        "Même les mots les plus simples prennent une autre dimension quand c'est à toi qu'ils s'adressent. ✉️✨",
+        "Je suis reconnaissant pour chaque seconde où nos univers se touchent. 🪐🖤",
+        "Tu as le don de rendre les choses légères quand tout paraît lourd. 🎈🤍",
+        "Si la vie était une toile blanche, tu serais le trait le plus pur et le plus marquant. 🖌️💫",
+        "Il n'y a aucun algorithme capable de calculer à quel point je te trouve incroyable. 🧮✨",
+        "Tu es mon endroit préféré, même quand ce n'est pas un lieu mais juste une personne. 🧭🖤",
+        "Que ce ticket te rappelle simplement que quelqu'un pense très fort à toi en ce moment même. 🎟️🤍",
+        "Dans ce grand théâtre qu'est le monde, tu es la seule scène qui mérite toute mon attention. 🎭✨",
+        "Peu importe où tu vas, j'espère que tu garderas toujours ce sourire qui désarme tout. 😊💫",
+        "Fin du rouleau de 100 tickets… mais jamais la fin de ce que je ressens pour toi. ♾️🖤"
+    ];
+
+    // Gestion du tirage sans doublons
+    let indicesDisponibles = [];
+    let compteurTicketsTires = 0;
+    let machineEnCours = false;
+    let audioCtx = null;
+
+    /* Petit synthétiseur sonore mécanique (100% JS natif, sans fichier audio) */
+    function jouerSonImpression() {
+        try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            // Série de petits clics d'imprimante thermique
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(180 + (i * 25), audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.04);
+                }, i * 75);
+            }
+        } catch (e) {}
+    }
+
+    function jouerSonTicketZoom() {
+        try {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(520, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.14);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.14);
+        } catch (e) {}
+    }
+
+    function reinitialiserPoolPhrases() {
+        indicesDisponibles = [];
+        for (let i = 0; i < phrasesMachine.length; i++) {
+            indicesDisponibles.push(i);
+        }
+        compteurTicketsTires = 0;
+        mettreAJourBadgeTickets();
+    }
+
+    function mettreAJourBadgeTickets() {
+        const badge = document.getElementById('badgeCompteurTickets');
+        if (badge) {
+            badge.innerText = `${indicesDisponibles.length} / ${phrasesMachine.length}`;
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const pTag = document.getElementById("texteBienvenueDynamique");
+        pTag.innerHTML = `Coucou <strong>${prenomUtilisateur}</strong> ! Je t'apprécie. Je t'apprécie vraiment, j'ai fait cet endroit spécialement pour toi. 🌸`;
+
+        reinitialiserPoolPhrases();
+        detecterFondsDisponibles();
+
+        setInterval(createFlower, 500);
+
+        lancerDelaiLecture('btnFermerAccueil', "C'est trop mignon ! ✨");
+    });
+
+    /* --- LOGIQUE AMÉLIORÉE DE LA MACHINE À TICKETS --- */
+    function actionnerMachineTicket() {
+        if (machineEnCours) return;
+        machineEnCours = true;
+
+        const btn = document.getElementById('btnTirerTicket');
+        const corps = document.getElementById('machineCorps');
+        const voyant = document.getElementById('voyantMachine');
+        const miniTicket = document.getElementById('miniTicketPapier');
+        const miniTicketCode = document.getElementById('miniTicketCode');
+        const ecranInfo = document.getElementById('ecranInfoMachine');
+        const barreProg = document.getElementById('barreProgressionTicket');
+
+        // Si les 100 phrases ont été consommées, on recharge automatiquement
+        if (indicesDisponibles.length === 0) {
+            reinitialiserPoolPhrases();
+            ecranInfo.innerText = "ROULEAU RECHARGÉ (100/100) ♻️";
+        } else {
+            ecranInfo.innerText = "IMPRESSION THERMIQUE EN COURS... ⚙️";
+        }
+
+        btn.disabled = true;
+        miniTicket.classList.remove('ejete');
+        barreProg.style.width = '0%';
+        corps.classList.add('vibration');
+        voyant.classList.add('clignote');
+
+        jouerSonImpression();
+
+        // Tirage aléatoire garanti sans doublon
+        const posAleatoire = Math.floor(Math.random() * indicesDisponibles.length);
+        const indexPhraseChoisie = indicesDisponibles.splice(posAleatoire, 1)[0];
+        const phraseSelectionnee = phrasesMachine[indexPhraseChoisie];
+
+        compteurTicketsTires++;
+        const numeroFormate = String(compteurTicketsTires).padStart(3, '0');
+        miniTicketCode.innerText = `MISA #${numeroFormate}`;
+        mettreAJourBadgeTickets();
+
+        // Animation de la barre de progression sur l'écran noir
+        setTimeout(() => { barreProg.style.width = '45%'; }, 120);
+        setTimeout(() => { barreProg.style.width = '85%'; }, 320);
+        setTimeout(() => { barreProg.style.width = '100%'; }, 550);
+
+        // Étape 1 : Sortie du ticket papier par la fente
+        setTimeout(() => {
+            corps.classList.remove('vibration');
+            miniTicket.classList.add('ejete');
+        }, 380);
+
+        // Étape 2 : Zoom automatique du ticket au centre de l'écran
+        setTimeout(() => {
+            voyant.classList.remove('clignote');
+            ecranInfo.innerText = `TICKET #${numeroFormate} DÉLIVRÉ • PRÊT 🖤`;
+            barreProg.style.width = '0%';
+
+            const maintenant = new Date();
+            const heureStr = String(maintenant.getHours()).padStart(2, '0') + ':' + String(maintenant.getMinutes()).padStart(2, '0');
+
+            document.getElementById('ticketNumeroTitre').innerText = `TICKET N°${numeroFormate} / ${phrasesMachine.length}`;
+            document.getElementById('ticketHeureTirage').innerText = heureStr;
+            document.getElementById('ticketPhraseTexte').innerText = phraseSelectionnee;
+
+            jouerSonTicketZoom();
+
+            const overlay = document.getElementById('ticketZoomOverlay');
+            overlay.style.display = 'flex';
+            requestAnimationFrame(() => {
+                overlay.classList.add('actif');
+            });
+
+            btn.disabled = false;
+            machineEnCours = false;
+        }, 1050);
+    }
+
+    function fermerTicketZoom() {
+        const overlay = document.getElementById('ticketZoomOverlay');
+        const miniTicket = document.getElementById('miniTicketPapier');
+
+        overlay.classList.remove('actif');
+        miniTicket.classList.remove('ejete');
+
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 300);
+    }
+
+    /* Détection intelligente des fichiers fond.jpeg, fond2.jpeg ... jusqu'à fond9.jpeg et + */
+    function detecterFondsDisponibles() {
+        listeFondsDisponibles = [];
+        let i = 1;
+        
+        function verifierSuivant() {
+            let nomFichier = (i === 1) ? 'fond.jpeg' : `fond${i}.jpeg`;
+            let img = new Image();
+            
+            img.onload = function() {
+                listeFondsDisponibles.push(nomFichier);
+                i++;
+                verifierSuivant();
+            };
+            
+            img.onerror = function() {
+                console.log(`Détection terminée : ${listeFondsDisponibles.length} image(s) de fond trouvée(s).`);
+                mettreAJourAffichageFond();
+            };
+            
+            img.src = nomFichier;
+        }
+
+        verifierSuivant();
+    }
+
+    /* Met à jour la sélection d'emojis et adapte immédiatement ceux déjà à l'écran */
+    function appliquerEmojisPourImage(nomImage) {
+        emojisActuels = emojisParImage[nomImage] || ['💀', '🖤', '📓', '🤍'];
+
+        const elementsActifs = document.querySelectorAll('.falling-flower');
+        elementsActifs.forEach(el => {
+            el.innerText = emojisActuels[Math.floor(Math.random() * emojisActuels.length)];
+        });
+    }
+
+    /* Applique visuellement le fond et les emojis correspondant à la page actuelle */
+    function mettreAJourAffichageFond() {
+        const fondDiv = document.getElementById('fondContainer');
+        let imageActive = '';
+
+        if (pageActuelle === 1) {
+            imageActive = (fondMemoirePage1 !== null) ? fondMemoirePage1 : fondDefautPage1;
+        } else if (pageActuelle === 2) {
+            imageActive = (fondMemoirePage2 !== null) ? fondMemoirePage2 : fondDefautPage2;
+        } else {
+            imageActive = (fondMemoirePage3 !== null) ? fondMemoirePage3 : fondDefautPage3;
+        }
+
+        fondDiv.style.backgroundImage = `url('${imageActive}')`;
+        appliquerEmojisPourImage(imageActive);
+    }
+
+    /* Changer de fond de manière cyclique pour la page active */
+    function changerProchainFond() {
+        if (listeFondsDisponibles.length === 0) {
+            alert("Aucun fichier 'fond.jpeg' détecté dans le dossier !");
+            return;
+        }
+
+        if (pageActuelle === 1) {
+            fondMemoirePage1 = listeFondsDisponibles[indexFondPage1];
+            indexFondPage1 = (indexFondPage1 + 1) % listeFondsDisponibles.length;
+        } else if (pageActuelle === 2) {
+            fondMemoirePage2 = listeFondsDisponibles[indexFondPage2];
+            indexFondPage2 = (indexFondPage2 + 1) % listeFondsDisponibles.length;
+        } else {
+            fondMemoirePage3 = listeFondsDisponibles[indexFondPage3];
+            indexFondPage3 = (indexFondPage3 + 1) % listeFondsDisponibles.length;
+        }
+
+        mettreAJourAffichageFond();
+    }
+
+    /* Remettre le fond par défaut uniquement pour la page active */
+    function remettreFondDefaut() {
+        if (pageActuelle === 1) {
+            fondMemoirePage1 = null;
+            indexFondPage1 = 0;
+        } else if (pageActuelle === 2) {
+            fondMemoirePage2 = null;
+            indexFondPage2 = 0;
+        } else {
+            fondMemoirePage3 = null;
+            indexFondPage3 = 0;
+        }
+        mettreAJourAffichageFond();
+    }
+
+    function createFlower() {
+        const container = document.querySelector('.flower-container');
+        if (!container) return;
+
+        const flower = document.createElement('div');
+        flower.classList.add('falling-flower');
+        
+        const emojiChoisi = emojisActuels[Math.floor(Math.random() * emojisActuels.length)];
+        flower.innerText = emojiChoisi;
+
+        flower.style.left = Math.random() * 100 + 'vw';
+        const duration = Math.random() * 6 + 7;
+        flower.style.animationDuration = duration + 's';
+        const size = Math.random() * 12 + 20;
+        flower.style.fontSize = size + 'px';
+
+        setTimeout(() => {
+            flower.remove();
+        }, duration * 1000);
+
+        container.appendChild(flower);
+    }
+
+    function lancerDelaiLecture(btnId, texteFinal) {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+
+        let secondesRestantes = 5;
+        btn.disabled = true;
+        btn.innerText = `Lecture... (${secondesRestantes}s)`;
+
+        const intervalle = setInterval(() => {
+            secondesRestantes--;
+            if (secondesRestantes > 0) {
+                btn.innerText = `Lecture... (${secondesRestantes}s)`;
+            } else {
+                clearInterval(intervalle);
+                btn.disabled = false;
+                btn.innerText = texteFinal;
+            }
+        }, 1000);
+    }
+
+    function fermerBienvenueEtOuvrirAmour() {
+        const popup1 = document.getElementById('messageBienvenue');
+        popup1.classList.add('disparition');
+
+        setTimeout(() => {
+            popup1.style.display = 'none';
+            const popup2 = document.getElementById('messageAmoureux');
+            popup2.style.display = 'block';
+            lancerDelaiLecture('btnFermerAmour', "J'ai compris ✨");
+        }, 400);
+    }
+
+    function fermerAmour() {
+        const popup2 = document.getElementById('messageAmoureux');
+        popup2.classList.add('disparition');
+
+        setTimeout(() => {
+            popup2.style.display = 'none';
+        }, 400);
+    }
+
+    function chargerLecteurCentral() {
+        const conteneur = document.getElementById('centreYoutube');
+        conteneur.innerHTML = `
+            <iframe src="https://www.youtube-nocookie.com/embed/aTK72cR-GOY?autoplay=1" 
+                    title="ATC Around the world (Miku and Luka)" 
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen>
+            </iframe>
+        `;
+    }
+
+    function basculerPage() {
+        const voile = document.getElementById('ecranVoile');
+        const iconeBouton = document.getElementById('iconeBouton');
+        const texteBouton = document.getElementById('texteBouton');
+        const centreYoutube = document.getElementById('centreYoutube');
+        const centreMachine = document.getElementById('centreMachine');
+
+        fermerTicketZoom();
+
+        voile.classList.add('fondu');
+
+        setTimeout(() => {
+            if (pageActuelle === 1) {
+                pageActuelle = 2;
+                centreYoutube.style.display = 'block';
+                centreMachine.style.display = 'none';
+                iconeBouton.innerText = "💌";
+                texteBouton.innerText = "P'tit mot doux";
+            } else if (pageActuelle === 2) {
+                pageActuelle = 3;
+                centreYoutube.style.display = 'none';
+                centreMachine.style.display = 'block';
+                iconeBouton.innerText = "🌸";
+                texteBouton.innerText = "Retour";
+            } else {
+                pageActuelle = 1;
+                centreYoutube.style.display = 'none';
+                centreMachine.style.display = 'none';
+                iconeBouton.innerText = "🎵";
+                texteBouton.innerText = "Musique";
+            }
+
+            mettreAJourAffichageFond();
+
+            voile.classList.remove('fondu');
+        }, 400);
+    }
+</script>
+
+</body>
+</html>
